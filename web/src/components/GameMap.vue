@@ -2,7 +2,8 @@
     <!-- let parent point to this div -->
   <div class="gamemap" ref="parent">
     <!-- let canvas points to this canvas tag -->
-    <canvas ref="canvas">
+    <!-- tabindex="0" is used to let canvas capture user input -->
+    <canvas ref="canvas" tabindex="0">
 
     </canvas>
   </div>

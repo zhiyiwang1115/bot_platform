@@ -1,4 +1,5 @@
 import { GameObject } from "./GameObject";
+import { Snake } from "./Snake";
 import { Wall } from "./Wall";
 
 export class GameMap extends GameObject {
@@ -10,9 +11,14 @@ export class GameMap extends GameObject {
         //the absolute length of each unit, which be adjusted according to browser size
         this.L = 0;
         this.rows = 13;
-        this.cols = 13;
+        this.cols = 14;
         this.inner_walls_cnt = 20;
         this.walls = [];
+
+        this.snakes = [
+            new Snake({id:0, color:"#4876EC", r: this.rows-2, c: 1},this),
+            new Snake({id:1, color:"#F94848", r: 1, c: this.cols-2},this),
+        ]
     }
 
     check_connectivity(g, sx, sy, tx, ty){
@@ -56,7 +62,7 @@ export class GameMap extends GameObject {
                 let c = parseInt(Math.random()*this.cols);
                 if(g[r][c])continue;
                 if((r==this.rows-2 && c==1) || (c==this.cols-2 && r==1))continue;
-                g[r][c] = g[c][r]= true;
+                g[r][c] = g[this.rows-1-r][this.cols-1-c]= true;
                 break;
             }
         }
@@ -76,11 +82,38 @@ export class GameMap extends GameObject {
         return true;
     }
 
+    add_listening_events(){
+        //focus canvas so that it can get user input
+        this.ctx.canvas.focus();
+        const [snake0, snake1] = this.snakes;
+        //bind the keyboard listener to canvas
+        this.ctx.canvas.addEventListener("keydown", e => {
+            if(e.key==='w')snake0.set_direction(0);
+            else if(e.key==='d')snake0.set_direction(1);
+            else if(e.key==='s')snake0.set_direction(2);
+            else if(e.key==='a')snake0.set_direction(3);
+            else if(e.key==='ArrowUp')snake1.set_direction(0);
+            else if(e.key==='ArrowRight')snake1.set_direction(1);
+            else if(e.key==='ArrowDown')snake1.set_direction(2);
+            else if(e.key==='ArrowLeft')snake1.set_direction(3);
+        });
+    }
+
     start(){
         for(let i = 0;i<1000;i++)
         {
             if(this.create_walls())break;
         }
+        this.add_listening_events();
+    }
+
+    //check if both snakes on at idle status and have next direction to move, ready for next round
+    check_ready(){
+        for(const snake of this.snakes){
+            if(snake.status!=='idle')return false;
+            if(snake.direction===-1)return false;
+        }
+        return true;
     }
 
     //update size of map according to the browser size
@@ -91,8 +124,33 @@ export class GameMap extends GameObject {
         this.ctx.canvas.height = this.L * this.rows;
     }
 
+    next_step(){
+        for(const snake of this.snakes){
+            snake.next_step();
+        }
+    }
+
+    check_valid(cell){ //detech if target cell is valid, not conflict with wall or body of a snake
+        for(const wall of this.walls){
+            if(wall.r===cell.r && wall.c===cell.c)return false;
+        }
+        for(const snake of this.snakes){
+            //when detecting, there is an edge case that snake tail may move or not
+            let k = snake.cells.length;
+            if(!snake.check_tail_increasing())k--; //when tail will move forward
+            for(let i = 0;i<k;i++){
+                if(snake.cells[i].r===cell.r && snake.cells[i].c===cell.c)return false;
+            }
+        }
+        return true;
+    }
+
     update(){
         this.update_size();
+        if(this.check_ready()){
+            this.next_step();
+
+        }
         this.render();
     }
 
