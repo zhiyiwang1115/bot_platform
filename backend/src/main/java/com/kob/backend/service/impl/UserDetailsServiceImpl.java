@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.management.Query;
 
 //implement user detail service for authorization in springboot-security
+//defualt springboot security would call this service for verification
 //need to add service annotation on service components
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

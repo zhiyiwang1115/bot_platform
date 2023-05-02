@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Wrapper;
 import java.util.List;
+//deprecated [just for tuning apis]
+
 
 //4 layers in springboot
 //pojo: database table => class
@@ -47,7 +49,7 @@ public class UserController {
     public String addUser(@PathVariable int userId,
                           @PathVariable String username,
                           @PathVariable String password){
-        User user = new User(userId,username,passwordEncoder.encode(password),null);
+        User user = new User(null,username,passwordEncoder.encode(password),null,null);
         userMapper.insert(user);
         return "success";
     }

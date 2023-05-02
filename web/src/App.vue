@@ -1,7 +1,9 @@
 <template>
-  <NavBar />
+  <div>
+    <NavBar />
   <!-- router-view controls components router -->
-  <router-view></router-view>
+  <router-view />
+  </div>
 </template>
 
 <script>
@@ -13,7 +15,7 @@ export default{
   //import components in vue, the key word must be "components"
   components: {
     NavBar
-  }
+  },
 }
 </script>
 
