@@ -31,7 +31,7 @@
           </ul>
         </li>
         </ul>
-        <ul class="navbar-nav" v-else>
+        <ul class="navbar-nav" v-else-if="!$store.state.user.pulling_info">
             <router-link :class="route_name=='user_account_login' ? 'nav-link active' : 'nav-link' " :to="{name: 'user_account_login'}">Login</router-link>
             <router-link :class="route_name=='user_account_register' ? 'nav-link active' : 'nav-link' " :to="{name: 'user_account_register'}">Register</router-link>
         </ul>
@@ -47,7 +47,6 @@ import {useRoute} from 'vue-router'
 //real time compute
 import {computed} from 'vue'
 import { useStore } from 'vuex';
-import router from '@/router/index'
 
 
 export default{
@@ -60,7 +59,6 @@ export default{
 
         const logout = () => {
             store.dispatch("logout");
-            router.push({name:"user_account_login"});
         }
 
         return{

@@ -1,5 +1,5 @@
 <template>
-    <ContentField>
+    <ContentField v-if="!$store.state.user.pulling_info">
         <!-- grid layout in bootstrap, split the whole with 12 parts, col-6 will take 6 parts -->
         <!-- justify-content-md-center is used to center -->
         <div class="row justify-content-md-center">
@@ -46,8 +46,29 @@ export default{
         let password = ref('');
         let error_message = ref('');
 
+        //before navigating to login, first check if there is jwt token at local storage
+        const jwt_token = localStorage.getItem("jwt_token");
+        if(jwt_token){
+            store.commit("updateToken",jwt_token);
+            store.dispatch("getinfo",{
+                        success(){
+                             //use push to navigate in the js
+                            router.push({name: 'home'});
+                            store.dispatch("updatePullingInfo", false);
+                            console.log(store.state.user);
+                        },
+                        error(resp){
+                            store.dispatch("updatePullingInfo", false);
+                            error_message.value = "something goes wrong, please try again"
+                        }
+                    });
+        }
+        else{
+            //if there is no jwt token, need to show login content as well
+            store.dispatch("updatePullingInfo", false);
+        }
+
         const login = ()=>{
-            console.log("here");
             //need use dispatch to invoke function in actions
             store.dispatch("login",{
                 //attention: .value is important to add for ref variables

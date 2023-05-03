@@ -13,6 +13,9 @@ export default{
         phto: "",
         token: "",
         is_login: false,
+        //variable to control the login page and navbar would not show before verifying local storage
+        //otherwise there would be a flash
+        pulling_info: true,
     },
     getters: {
     },
@@ -32,7 +35,10 @@ export default{
             state.photo - "";
             state.token = "";
             state.is_login = false;
-        }
+        },
+        updatePullingInfo(state, pulling_info){
+            state.pulling_info = pulling_info;
+        },
     },
     actions: {
         //in the action operation, when invoking the functions in mutations, we need invoke context.commit()
@@ -47,6 +53,9 @@ export default{
                 },
                 success(resp){
                     if(resp.error_message==="success"){
+                        //also store token in the local storage (do not need to import)
+                        //the local storage is similar to a dictionary
+                        localStorage.setItem("jwt_token", resp.token);
                         context.commit("updateToken", resp.token);
                         data.success(resp); //callback function
                     }
@@ -84,10 +93,17 @@ export default{
                 },
               });
         },
-
+        
         logout(context){
+            //remove jwt token from local storage
+            localStorage.removeItem("jwt_token");
             context.commit("logout");
+        },
+
+        updatePullingInfo(context){
+            context.commit("updatePullingInfo");
         }
+
     },
     modules: {
     }
