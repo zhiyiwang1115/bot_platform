@@ -22,9 +22,9 @@ public class Bot {
     private String title;
     private String description;
     private String content;
-    //define the format of date
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    //define the format of date at Australian time
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Australia/Sydney")
     private Date createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Australia/Sydney")
     private Date modifyTime;
 }

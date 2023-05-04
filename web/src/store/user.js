@@ -23,7 +23,7 @@ export default{
         updateUser(state, user){
             state.id = user.id;
             state.username = user.username;
-            state.phto = user.photo;
+            state.photo = user.photo;
             state.is_login = user.is_login;
         },
         updateToken(state, token){
@@ -32,7 +32,7 @@ export default{
         logout(state){
             state.id = "";
             state.username = "";
-            state.photo - "";
+            state.photo = "";
             state.token = "";
             state.is_login = false;
         },
