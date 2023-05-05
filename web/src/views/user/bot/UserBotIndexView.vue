@@ -14,7 +14,7 @@
                         <span style="font-size: 130%">My Bots</span> 
                         <!-- float-end class means right aligned -->
                         <!-- open modal based on id -->
-                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#add-bot-modal">Create a Bot</button>
+                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#add-bot-modal" @click="empty_error">Create a Bot</button>
                     
                     
                     </div>
@@ -37,7 +37,7 @@
                                     <td>
                                         <!-- here each button control one modal, so the id of different modal should be different
                                         this can be implemented by adding bot id in the modal tag id -->
-                                        <button type="button" class="btn btn-secondary" style="margin-right:10px" data-bs-toggle="modal" :data-bs-target="'#update-bot-modal-'+bot.id">Update</button>
+                                        <button type="button" class="btn btn-secondary" style="margin-right:10px" data-bs-toggle="modal" :data-bs-target="'#update-bot-modal-'+bot.id" @click="empty_error">Update</button>
                                         
                                         
                                         
@@ -330,6 +330,10 @@ export default{
             });
         }
 
+        const empty_error = () => {
+            botadd.error_message = "";
+        }
+
         return{
             bots,
             botadd,
@@ -337,6 +341,7 @@ export default{
             remove_bot,
             update_bot,
             aceConfig,
+            empty_error,
         }
 
     }
