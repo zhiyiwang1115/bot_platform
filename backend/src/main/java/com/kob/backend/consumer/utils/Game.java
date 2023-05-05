@@ -1,21 +1,73 @@
 package com.kob.backend.consumer.utils;
 
-import java.util.Random;
+import com.alibaba.fastjson.JSONObject;
+import com.kob.backend.consumer.WebSocketServer;
 
-public class Game {
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
+
+//make game class support multi-thread, or as a second thread
+//after creating a game, a thread will wait some seconds for next operations of two players
+//if a single thread is doing that, then it will block the whole progress
+//therefore, we need two threads here, one is for read client operations (the websocketserver)
+//the other is checking if next step should be done and judged (the game itself)
+public class Game extends Thread{
     private Integer rows;
     private Integer cols;
     private Integer inner_walls_cnt;
     private int[][] g;
 
+    private Player playerA, playerB;
+    private Integer nextStepA = null;
+    private Integer nextStepB = null;
+    //here in this thread, it will check if nextstepA and nextstepB is null, which is a read operation
+    //while in the main thread, it will have write operation into these two variables
+    //for write-read, write-write operations, there may be race condition
+    //therefore, should add a lock when reading and writing
+    public ReentrantLock lock = new ReentrantLock();
+    private String status = "playing"; // playing -> finished
+    private String loser = ""; // all, A, B
+
+
     private static int[] dx = {-1,0,1,0};
     private static int[] dy = {0,1,0,-1};
 
-    public Game(Integer rows, Integer cols, Integer inner_walls_cnt){
+    public Game(Integer rows, Integer cols, Integer inner_walls_cnt, Integer idA, Integer idB){
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_cnt = inner_walls_cnt;
         this.g = new int[rows][cols];
+        playerA = new Player(idA,rows-2,1,new ArrayList<>());
+        playerB = new Player(idB,1,cols-2,new ArrayList<>());
+    }
+
+    public Player getPlayerA() {
+        return playerA;
+    }
+
+    public Player getPlayerB() {
+        return playerB;
+    }
+
+    public void setNextStepA(Integer nextStepA) {
+        lock.lock();;
+        try{
+            this.nextStepA = nextStepA;
+        }finally {
+            //unlock the lock anyway
+            lock.unlock();
+        }
+    }
+
+    public void setNextStepB(Integer nextStepB) {
+        lock.lock();;
+        try{
+            this.nextStepB = nextStepB;
+        }finally {
+            //unlock the lock anyway
+            lock.unlock();
+        }
     }
 
     public int[][] getG(){
@@ -76,4 +128,99 @@ public class Game {
         }
     }
 
+    private boolean nextStep(){ //wait next steps of two players
+        try {
+            //the reason of sleeping here is that the thread will keep getting next step
+            //it is possible that the operations are done so fast by bots
+            // that frontend is not able to render at the same rate
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        try{
+            for(int i = 0;i<50;i++){
+                Thread.sleep(100);
+                lock.lock();
+                try{
+                    if(nextStepA!=null && nextStepB!=null){
+                        playerA.getSteps().add(nextStepA);
+                        playerB.getSteps().add(nextStepB);
+                        return true;
+                    }
+                }finally {
+                    lock.unlock();
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private void sendAllMessage(String message){
+        WebSocketServer.users.get(playerA.getId()).sendMessage(message);
+        WebSocketServer.users.get(playerB.getId()).sendMessage(message);
+    }
+    private void sendMove(){//send moves to two clients
+        lock.lock();
+        try {
+            JSONObject resp = new JSONObject();
+            resp.put("event","move");
+            //here has potential race condition as well, should use the last element at playerA.getSteps()
+            resp.put("a_direction",nextStepA);
+            resp.put("b_direction",nextStepB);
+            sendAllMessage(resp.toJSONString());
+            //empty the direction
+            nextStepA = nextStepB = null;
+        }finally {
+            lock.unlock();
+        }
+
+    }
+    private void judge(){ //check if operations from two players are valid
+
+    }
+    private void sendResult(){ //send results to two clients
+        JSONObject resp = new JSONObject();
+        resp.put("event","result");
+        resp.put("loser",loser);
+        sendAllMessage(resp.toJSONString());
+    }
+
+    //entrance function of running a thread
+    //here it would wait 5 seconds, checking if there are moves from two players
+    @Override
+    public void run(){
+        //the game must end within 1000 steps
+        for(int i = 0;i<1000;i++){
+            if(nextStep()){
+                judge();
+                if(status.equals("playing")){
+                    sendMove();
+                }else {
+                    sendResult();
+                }
+            }else{
+                //if some player does not have next input
+                //game is finished
+                status = "finished";
+                //here there may still have race condition
+                //can let nextstep return losers directly in the future
+                lock.lock();
+                try{
+                    if(nextStepA==null && nextStepB==null){
+                        loser = "all";
+                    }else if (nextStepA==null){
+                        loser = "A";
+                    }else{
+                        loser = "B";
+                    }
+                }finally {
+                    lock.unlock();
+                }
+                sendResult();
+                break;
+            }
+        }
+    }
 }

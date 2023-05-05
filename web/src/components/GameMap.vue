@@ -27,7 +27,7 @@ export default {
         onMounted(()=>{
             //need to use value attribute to get value
             //here pass the global store into gamemap object to draw gamemap
-            new GameMap(canvas.value.getContext('2d'), parent.value, store);
+            store.commit("updateGameObject", new GameMap(canvas.value.getContext('2d'), parent.value, store));
         });
         
 

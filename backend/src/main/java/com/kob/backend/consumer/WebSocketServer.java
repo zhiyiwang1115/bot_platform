@@ -39,9 +39,11 @@ public class WebSocketServer {
     private Session session = null;
     private User user;
 
+    private Game game = null;
+
     //need to store and maintain all connections using static variable
     //need to be thread safe as many threads would visit it at the same time
-    private static ConcurrentHashMap<Integer,WebSocketServer> users = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<Integer,WebSocketServer> users = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("token") String token) throws IOException {
@@ -83,21 +85,37 @@ public class WebSocketServer {
 
             //create map after successful match
             //would need to store game between socket a and socket b in the future
-            Game game = new Game(13,14,20);
+            game = new Game(13,14,20,a.getId(),b.getId());
             game.createMap();
+            //it will do run() in game as the second thread
+            game.start();
+
+            users.get(a.getId()).game = game;
+            users.get(b.getId()).game = game;
+
+            JSONObject respGame = new JSONObject();
+            respGame.put("a_id", game.getPlayerA().getId());
+            respGame.put("a_sx", game.getPlayerA().getSx());
+            respGame.put("a_sy", game.getPlayerA().getSy());
+
+            respGame.put("b_id", game.getPlayerB().getId());
+            respGame.put("b_sx", game.getPlayerB().getSx());
+            respGame.put("b_sy", game.getPlayerB().getSy());
+
+            respGame.put("map",game.getG());
 
             JSONObject respA = new JSONObject();
             respA.put("event","match-success");
             respA.put("opponent_username",b.getUsername());
             respA.put("opponent_photo",b.getPhoto());
-            respA.put("gamemap",game.getG());
+            respA.put("game",respGame);
             users.get(a.getId()).sendMessage(respA.toJSONString());
 
             JSONObject respB = new JSONObject();
             respB.put("event","match-success");
             respB.put("opponent_username",a.getUsername());
             respB.put("opponent_photo",a.getPhoto());
-            respB.put("gamemap",game.getG());
+            respB.put("game",respGame);
             users.get(b.getId()).sendMessage(respB.toJSONString());
         }
     }
@@ -107,17 +125,29 @@ public class WebSocketServer {
         matchPool.remove(this.user);
     }
 
+    private void move(int direction){
+        if(user.getId().equals(game.getPlayerA().getId())){
+            game.setNextStepA(direction);
+        }else if (user.getId().equals(game.getPlayerB().getId())){
+            game.setNextStepB(direction);
+        }
+    }
+
     @OnMessage
     public void onMessage(String message, Session session) {
         // when receiving message from client
         System.out.println("receive message");
         // change string to json object
         JSONObject data = JSONObject.parseObject(message);
+        System.out.println(data.toJSONString());
+        System.out.println(user.getId());
         String event = data.getString("event");
         if("start-matching".equals(event)){
             startMatching();
         }else if("stop-matching".equals(event)){
             stopMatching();
+        }else if("move".equals(event)){
+            move(data.getInteger("direction"));
         }
 
     }
