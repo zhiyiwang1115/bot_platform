@@ -1,9 +1,10 @@
 package com.kob.backend.consumer;
 
+import com.alibaba.fastjson.JSONObject;
+import com.kob.backend.consumer.utils.Game;
 import com.kob.backend.consumer.utils.JwtAuthentication;
 import com.kob.backend.mapper.UserMapper;
 import com.kob.backend.pojo.User;
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,9 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 // In essential, every time there is a websocket connection
 // a websocket server object is constructed, which includes all information in the connection
@@ -29,6 +32,8 @@ public class WebSocketServer {
         WebSocketServer.userMapper = userMapper;
     }
 
+    //thread-safe matching pool
+    private static CopyOnWriteArraySet<User> matchPool = new CopyOnWriteArraySet<>();
 
 //    session is used for backend to send message to frontend
     private Session session = null;
@@ -60,13 +65,61 @@ public class WebSocketServer {
         System.out.println("disconnected");
         if(this.user!=null){
             users.remove(this.user.getId());
+            matchPool.remove(this.user);
         }
+    }
+
+    private void startMatching(){
+        System.out.println("start matching");
+        //currently just for debugging purpose,
+        // would be substituted with micro-service in the future
+        matchPool.add(this.user);
+
+        while(matchPool.size()>=2){
+            Iterator<User> it = matchPool.iterator();
+            User a = it.next(), b = it.next();
+            matchPool.remove(a);
+            matchPool.remove(b);
+
+            //create map after successful match
+            //would need to store game between socket a and socket b in the future
+            Game game = new Game(13,14,20);
+            game.createMap();
+
+            JSONObject respA = new JSONObject();
+            respA.put("event","match-success");
+            respA.put("opponent_username",b.getUsername());
+            respA.put("opponent_photo",b.getPhoto());
+            respA.put("gamemap",game.getG());
+            users.get(a.getId()).sendMessage(respA.toJSONString());
+
+            JSONObject respB = new JSONObject();
+            respB.put("event","match-success");
+            respB.put("opponent_username",a.getUsername());
+            respB.put("opponent_photo",a.getPhoto());
+            respB.put("gamemap",game.getG());
+            users.get(b.getId()).sendMessage(respB.toJSONString());
+        }
+    }
+
+    private void stopMatching(){
+        System.out.println("stop matching");
+        matchPool.remove(this.user);
     }
 
     @OnMessage
     public void onMessage(String message, Session session) {
         // when receiving message from client
         System.out.println("receive message");
+        // change string to json object
+        JSONObject data = JSONObject.parseObject(message);
+        String event = data.getString("event");
+        if("start-matching".equals(event)){
+            startMatching();
+        }else if("stop-matching".equals(event)){
+            stopMatching();
+        }
+
     }
 
     @OnError

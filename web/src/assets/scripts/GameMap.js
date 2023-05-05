@@ -4,10 +4,11 @@ import { Wall } from "./Wall";
 
 export class GameMap extends GameObject {
     //ctx is canva, parent is the parent of ctx used to dynamically adjust the width and length of canva
-    constructor(ctx, parent){
+    constructor(ctx, parent, store){
         super();
         this.ctx = ctx;
         this.parent = parent;
+        this.store = store;
         //the absolute length of each unit, which be adjusted according to browser size
         this.L = 0;
         this.rows = 13;
@@ -21,56 +22,58 @@ export class GameMap extends GameObject {
         ]
     }
 
-    check_connectivity(g, sx, sy, tx, ty){
-        if(sx==tx && sy==ty)return true;
-        g[sx][sy] = true;
-        let dx = [0,-1,1,0];
-        let dy = [1,0,0,-1];
-        for(let i = 0;i<4;i++){
-            let nx = sx + dx[i], ny = sy + dy[i];
-            if(g[nx][ny])continue;
-            if(this.check_connectivity(g,nx,ny,tx,ty))return true;
-        }
-        return false;
-    }
+    //map creation are put into backend
+
+    // check_connectivity(g, sx, sy, tx, ty){
+    //     if(sx==tx && sy==ty)return true;
+    //     g[sx][sy] = true;
+    //     let dx = [0,-1,1,0];
+    //     let dy = [1,0,0,-1];
+    //     for(let i = 0;i<4;i++){
+    //         let nx = sx + dx[i], ny = sy + dy[i];
+    //         if(g[nx][ny])continue;
+    //         if(this.check_connectivity(g,nx,ny,tx,ty))return true;
+    //     }
+    //     return false;
+    // }
 
     //the reason why wall color would cover map color is because the creation of walls is later than the one of map in the list
     //when rendering every object is rendered according to the order in the list
     create_walls(){
-        const g = [];
-        for(let r = 0;r<this.rows;r++){
-            g.push([]);
-            for(let c = 0;c<this.cols;c++){
-                g[r].push(false);
-            }
-        }
+        // const g = [];
+        // for(let r = 0;r<this.rows;r++){
+        //     g.push([]);
+        //     for(let c = 0;c<this.cols;c++){
+        //         g[r].push(false);
+        //     }
+        // }
 
-        //construct wall on surroundings
-        for(let r = 0;r<this.rows;r++){
-            g[r][0] = g[r][this.cols-1] = true;
-        }
+        // //construct wall on surroundings
+        // for(let r = 0;r<this.rows;r++){
+        //     g[r][0] = g[r][this.cols-1] = true;
+        // }
 
-        for(let c = 0;c<this.cols;c++){
-            g[0][c] = g[this.rows-1][c] = true;
-        }
+        // for(let c = 0;c<this.cols;c++){
+        //     g[0][c] = g[this.rows-1][c] = true;
+        // }
 
-        //create random walls on the map
-        for(let i = 0;i<this.inner_walls_cnt/2;i++){
-            for(let j = 0;j<1000;j++){
-                //math.random() will randomly pick a floating number from 0 to 1
-                let r = parseInt(Math.random()*this.rows);
-                let c = parseInt(Math.random()*this.cols);
-                if(g[r][c])continue;
-                if((r==this.rows-2 && c==1) || (c==this.cols-2 && r==1))continue;
-                g[r][c] = g[this.rows-1-r][this.cols-1-c]= true;
-                break;
-            }
-        }
+        // //create random walls on the map
+        // for(let i = 0;i<this.inner_walls_cnt/2;i++){
+        //     for(let j = 0;j<1000;j++){
+        //         //math.random() will randomly pick a floating number from 0 to 1
+        //         let r = parseInt(Math.random()*this.rows);
+        //         let c = parseInt(Math.random()*this.cols);
+        //         if(g[r][c])continue;
+        //         if((r==this.rows-2 && c==1) || (c==this.cols-2 && r==1))continue;
+        //         g[r][c] = g[this.rows-1-r][this.cols-1-c]= true;
+        //         break;
+        //     }
+        // }
 
-        //deep copy in js because js pass by reference
-        const copy_g = JSON.parse(JSON.stringify(g));
-        if(!this.check_connectivity(copy_g,this.rows-2,1,1,this.cols-2))return false;
-
+        // //deep copy in js because js pass by reference
+        // const copy_g = JSON.parse(JSON.stringify(g));
+        // if(!this.check_connectivity(copy_g,this.rows-2,1,1,this.cols-2))return false;
+        const g = this.store.state.pk.gamemap;
         for(let r = 0;r<this.rows;r++){
             for(let c = 0;c<this.cols;c++){
                 if(g[r][c]){
@@ -100,10 +103,11 @@ export class GameMap extends GameObject {
     }
 
     start(){
-        for(let i = 0;i<1000;i++)
-        {
-            if(this.create_walls())break;
-        }
+        // for(let i = 0;i<1000;i++)
+        // {
+        //     if(this.create_walls())break;
+        // }
+        this.create_walls();
         this.add_listening_events();
     }
 

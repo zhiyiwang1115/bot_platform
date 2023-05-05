@@ -57,7 +57,7 @@ export default{
                             store.dispatch("updatePullingInfo", false);
                             console.log(store.state.user);
                         },
-                        error(resp){
+                        error(){
                             store.dispatch("updatePullingInfo", false);
                             error_message.value = "something goes wrong, please try again"
                         }
@@ -74,19 +74,19 @@ export default{
                 //attention: .value is important to add for ref variables
                 username: username.value,
                 password: password.value,
-                success(resp){
+                success(){
                     store.dispatch("getinfo",{
                         success(){
                              //use push to navigate in the js
                             router.push({name: 'home'});
                             console.log(store.state.user);
                         },
-                        error(resp){
+                        error(){
                             error_message.value = "something goes wrong, please try again"
                         }
                     });
                 },
-                error(resp){
+                error(){
                     error_message.value = "username or password is wrong";
                 }
             });

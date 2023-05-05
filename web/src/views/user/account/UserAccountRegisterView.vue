@@ -31,8 +31,6 @@
 
 <script>
 import ContentField from '@/components/ContentField.vue'
-//import useStore for global store
-import {useStore} from 'vuex'
 //similar to state in react
 import {ref} from 'vue'
 //import router to navigate
@@ -46,7 +44,6 @@ export default{
     //setup is like defining all varibales and functions required on the page as preparation
     setup(){
         //get global store
-        const store = useStore();
         let username = ref('');
         let password = ref('');
         let confirmedPassword = ref('')
@@ -69,7 +66,7 @@ export default{
                         error_message.value = resp.error_message;
                     }
                 },
-                error(resp){
+                error(){
                     error_message.value = "something goes wrong, please try again";
                 },
             });

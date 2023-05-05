@@ -12,6 +12,7 @@
 <script>
 import { GameMap } from '@/assets/scripts/GameMap';
 import { ref, onMounted } from 'vue';
+import { useStore } from 'vuex';
 
 export default {
     setup(){
@@ -20,10 +21,13 @@ export default {
         let parent = ref(null);
         let canvas = ref(null);
 
+        const store = useStore();
+
         //onMounted is put into setup as well
         onMounted(()=>{
             //need to use value attribute to get value
-            new GameMap(canvas.value.getContext('2d'), parent.value);
+            //here pass the global store into gamemap object to draw gamemap
+            new GameMap(canvas.value.getContext('2d'), parent.value, store);
         });
         
 
