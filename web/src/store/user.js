@@ -44,7 +44,7 @@ export default{
         //in the action operation, when invoking the functions in mutations, we need invoke context.commit()
         login(context, data){
             $.ajax({
-                //must including http, also cannot be https!!!
+                //must including http, also cannot be https because of no certificaiton!!!
                 url: "http://127.0.0.1:3000/user/account/token/",
                 type: "post",
                 data: {
