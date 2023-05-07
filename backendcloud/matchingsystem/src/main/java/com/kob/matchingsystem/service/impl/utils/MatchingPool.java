@@ -31,9 +31,42 @@ public class MatchingPool extends Thread{
         }
     }
 
+    private void increaseWaitingTime(){ //increase waiting time of all players by 1
+        for(Player player: players){
+            player.setWaitingTime(player.getWaitingTime()+1);.
+        }
+    }
+
+    private boolean checkMatched(Player a, Player b){
+
+    }
+
+    private void sendResult(Player a, Player b){
+        
+    }
+    private void matchPlayers(){
+
+    }
+
 
     @Override
     public void run(){
+        //while loop, every 1s check if there can be any matches
+        while(true){
+            try {
+                Thread.sleep(1000);
+                lock.lock();
+                try{
+                    matchPlayers();
+                    increaseWaitingTime();
+                }finally {
+                    lock.unlock();
+                }
 
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                break;
+            }
+        }
     }
 }
