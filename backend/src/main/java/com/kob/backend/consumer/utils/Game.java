@@ -2,8 +2,11 @@ package com.kob.backend.consumer.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kob.backend.consumer.WebSocketServer;
+import com.kob.backend.pojo.Record;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -177,13 +180,73 @@ public class Game extends Thread{
         }
 
     }
-    private void judge(){ //check if operations from two players are valid
 
+    private boolean check_valid(List<Cell> cellsA, List<Cell> cellsB){
+        Cell cell = cellsA.get(0);
+        if(g[cell.x][cell.y]==1)return false;
+        //can be updated to iterator so that the efficiency would be better
+        for(int i = 1;i<cellsA.size();i++){
+            Cell c = cellsA.get(i);
+            if(cell.x==c.x && cell.y==c.y)return false;
+        }
+        for(int i = 0;i<cellsB.size();i++){
+            Cell c = cellsB.get(i);
+            if(cell.x==c.x && cell.y==c.y)return false;
+        }
+        return true;
     }
+
+    private void judge(){ //check if operations from two players are valid
+        List<Cell> cellsA = playerA.getCells();
+        List<Cell> cellsB = playerB.getCells();
+        boolean validA = check_valid(cellsA,cellsB);
+        boolean validB = check_valid(cellsB, cellsA);
+        if(!validA && !validB){
+            status = "finished";
+            loser = "all";
+        }
+        else if(!validA){
+            status = "finished";
+            loser = "A";
+        }
+        else if(!validB){
+            status = "finished";
+            loser = "B";
+        }
+    }
+
+    private String getMapString(){
+        StringBuilder res = new StringBuilder();
+        for(int i = 0;i<rows;i++){
+            for(int j = 0;j<cols;j++){
+                res.append(g[i][j]);
+            }
+        }
+        return res.toString();
+    }
+    private void saveToDatabase(){
+        Record record = new Record(
+                null,
+                playerA.getId(),
+                playerA.getSx(),
+                playerA.getSy(),
+                playerB.getId(),
+                playerB.getSx(),
+                playerB.getSy(),
+                playerA.getStepsString(),
+                playerB.getStepsString(),
+                getMapString(),
+                new Date(),
+                loser
+                );
+        WebSocketServer.recordMapper.insert(record);
+    }
+
     private void sendResult(){ //send results to two clients
         JSONObject resp = new JSONObject();
         resp.put("event","result");
         resp.put("loser",loser);
+        saveToDatabase();
         sendAllMessage(resp.toJSONString());
     }
 
@@ -199,6 +262,7 @@ public class Game extends Thread{
                     sendMove();
                 }else {
                     sendResult();
+                    break;
                 }
             }else{
                 //if some player does not have next input

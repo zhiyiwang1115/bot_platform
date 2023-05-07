@@ -52,10 +52,11 @@ export class Snake extends GameObject{
             this.cells[i]=JSON.parse(JSON.stringify(this.cells[i-1]));
         }
 
-        if(!this.gamemap.check_valid(this.next_cell)){ //next step is invalid, snake dies
-            //if a nake is in status "die", it would never become "idle" so that the gamemap would never be ready for next move
-            this.status = "die";
-        }
+        //move to backend for validation
+        // if(!this.gamemap.check_valid(this.next_cell)){ //next step is invalid, snake dies
+        //     //if a nake is in status "die", it would never become "idle" so that the gamemap would never be ready for next move
+        //     this.status = "die";
+        // }
     }
 
     update_move(){
@@ -71,8 +72,8 @@ export class Snake extends GameObject{
         }else{
              //timedelta is in million seconds
              const move_distance = this.speed * this.timedelta/1000;
-             this.cells[0].x += move_distance * dx / distance; //distance to move on x-axis
-             this.cells[0].y += move_distance * dy / distance; //distance to move on y-axis
+             this.cells[0].x += move_distance * dx / distance; //distance to move on x-axis for the head circle
+             this.cells[0].y += move_distance * dy / distance; //distance to move on y-axis for the head circle
 
              if(!this.check_tail_increasing()){
                 const k = this.cells.length;

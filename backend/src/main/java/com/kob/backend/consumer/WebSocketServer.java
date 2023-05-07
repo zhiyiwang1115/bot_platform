@@ -3,6 +3,7 @@ package com.kob.backend.consumer;
 import com.alibaba.fastjson.JSONObject;
 import com.kob.backend.consumer.utils.Game;
 import com.kob.backend.consumer.utils.JwtAuthentication;
+import com.kob.backend.mapper.RecordMapper;
 import com.kob.backend.mapper.UserMapper;
 import com.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,13 @@ public class WebSocketServer {
     @Autowired
     public void setUserMapper(UserMapper userMapper){
         WebSocketServer.userMapper = userMapper;
+    }
+
+    //not sure if it can be stored in player.java
+    public static RecordMapper recordMapper;
+    @Autowired
+    public void setRecordMapperMapper(RecordMapper recordMapper){
+        WebSocketServer.recordMapper = recordMapper;
     }
 
     //thread-safe matching pool
