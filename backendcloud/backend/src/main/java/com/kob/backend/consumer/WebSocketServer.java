@@ -3,8 +3,10 @@ package com.kob.backend.consumer;
 import com.alibaba.fastjson.JSONObject;
 import com.kob.backend.consumer.utils.Game;
 import com.kob.backend.consumer.utils.JwtAuthentication;
+import com.kob.backend.mapper.BotMapper;
 import com.kob.backend.mapper.RecordMapper;
 import com.kob.backend.mapper.UserMapper;
+import com.kob.backend.pojo.Bot;
 import com.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,11 @@ public class WebSocketServer {
         WebSocketServer.userMapper = userMapper;
     }
 
+    private static BotMapper botMapper;
+    @Autowired
+    public void setBotMapper(BotMapper botMapper){
+        WebSocketServer.botMapper = botMapper;
+    }
     //not sure if it can be stored in player.java
     public static RecordMapper recordMapper;
     @Autowired
@@ -56,6 +63,8 @@ public class WebSocketServer {
     //need to store and maintain all connections using static variable
     //need to be thread safe as many threads would visit it at the same time
     public static ConcurrentHashMap<Integer,WebSocketServer> users = new ConcurrentHashMap<>();
+
+    private Integer botId;
 
     private static String addPlayerUrl = "http://127.0.0.1:3001/player/add/";
     private static String removePlayerUrl = "http://127.0.0.1:3001/player/remove/";
@@ -88,7 +97,12 @@ public class WebSocketServer {
 
     public static void StartGame(Integer aId, Integer bId){
         User a = userMapper.selectById(aId);
+        Integer aBotId = users.get(aId).botId;
         User b = userMapper.selectById(bId);
+        Integer bBotId = users.get(bId).botId;
+
+        Bot botA = botMapper.selectById(aBotId);
+        Bot botB = botMapper.selectById(bBotId);
 
         //create map after successful match
         //would need to store game between socket a and socket b in the future
@@ -169,6 +183,7 @@ public class WebSocketServer {
         System.out.println(user.getId());
         String event = data.getString("event");
         if("start-matching".equals(event)){
+            botId = data.getInteger("bot_id");
             startMatching();
         }else if("stop-matching".equals(event)){
             stopMatching();
