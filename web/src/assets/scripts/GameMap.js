@@ -88,7 +88,7 @@ export class GameMap extends GameObject {
     add_listening_events(){
         //focus canvas so that it can get user input
         this.ctx.canvas.focus();
-        const [snake0, snake1] = this.snakes;
+        // const [snake0, snake1] = this.snakes;
         //bind the keyboard listener to canvas
         this.ctx.canvas.addEventListener("keydown", e => {
             // if(e.key==='w')snake0.set_direction(0);

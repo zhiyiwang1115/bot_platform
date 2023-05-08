@@ -86,19 +86,25 @@ public class WebSocketServer {
         }
     }
 
-    private void StartGame(Integer aId, Integer bId){
+    public static void StartGame(Integer aId, Integer bId){
         User a = userMapper.selectById(aId);
         User b = userMapper.selectById(bId);
 
         //create map after successful match
         //would need to store game between socket a and socket b in the future
-        game = new Game(13,14,20,a.getId(),b.getId());
+        Game game = new Game(13,14,20,a.getId(),b.getId());
         game.createMap();
         //it will do run() in game as the second thread
         game.start();
 
-        users.get(a.getId()).game = game;
-        users.get(b.getId()).game = game;
+        //when a client close the browser after matching
+        //then users.get(a.getId()) can be null, so exception
+        //therefore, have to first verify if it is null
+        //same applies to tje others as well
+        if(users.get(a.getId())!=null)
+            users.get(a.getId()).game = game;
+        if(users.get(b.getId())!=null)
+            users.get(b.getId()).game = game;
 
         JSONObject respGame = new JSONObject();
         respGame.put("a_id", game.getPlayerA().getId());
@@ -116,14 +122,17 @@ public class WebSocketServer {
         respA.put("opponent_username",b.getUsername());
         respA.put("opponent_photo",b.getPhoto());
         respA.put("game",respGame);
-        users.get(a.getId()).sendMessage(respA.toJSONString());
+
+        if(users.get(a.getId())!=null)
+            users.get(a.getId()).sendMessage(respA.toJSONString());
 
         JSONObject respB = new JSONObject();
         respB.put("event","match-success");
         respB.put("opponent_username",a.getUsername());
         respB.put("opponent_photo",a.getPhoto());
         respB.put("game",respGame);
-        users.get(b.getId()).sendMessage(respB.toJSONString());
+        if(users.get(b.getId())!=null)
+            users.get(b.getId()).sendMessage(respB.toJSONString());
     }
 
     private void startMatching(){

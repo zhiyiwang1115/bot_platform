@@ -161,8 +161,14 @@ public class Game extends Thread{
     }
 
     private void sendAllMessage(String message){
-        WebSocketServer.users.get(playerA.getId()).sendMessage(message);
-        WebSocketServer.users.get(playerB.getId()).sendMessage(message);
+        //when a client close the browser after matching
+        //then users.get(a.getId()) can be null, so exception
+        //therefore, have to first verify if it is null
+        //same applies to tje others as well
+        if(WebSocketServer.users.get(playerA.getId())!=null)
+            WebSocketServer.users.get(playerA.getId()).sendMessage(message);
+        if(WebSocketServer.users.get(playerB.getId())!=null)
+            WebSocketServer.users.get(playerB.getId()).sendMessage(message);
     }
     private void sendMove(){//send moves to two clients
         lock.lock();
