@@ -66,9 +66,12 @@ public class Consumer extends Thread{
                 addUid(bot.getBotCode(), uid)
         ).create().get();
 
+//        Later, for different languages, file is usually used to pass input
+//        also can use a more general interface Supplier<Integer>
         File file = new File("input.txt");
         try (PrintWriter fout = new PrintWriter(file)) {
             fout.println(bot.getInput());
+            //empty the cache; otherwise may not read the correct content
             fout.flush();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);

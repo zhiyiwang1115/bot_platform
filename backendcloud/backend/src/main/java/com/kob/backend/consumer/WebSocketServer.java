@@ -32,7 +32,7 @@ public class WebSocketServer {
     //it is not a skeleton instance
     //because everytime a connection is build, a new object would be constructed
     //it needs to inject something with a static variable
-    private static UserMapper userMapper;
+    public static UserMapper userMapper;
     @Autowired
     public void setUserMapper(UserMapper userMapper){
         WebSocketServer.userMapper = userMapper;
