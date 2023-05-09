@@ -23,6 +23,8 @@ export default{
       const store = useStore();
       const socketUrl = `ws://127.0.0.1:3000/websocket/${store.state.user.token}/` //note here it should be `` rather than ''
 
+      //otherwise there would be a win/lose/draw box
+      store.commit("updateLoser","");
       //can use commit here as well
       store.commit("updateOpponent",{
         username: "Your Opponent",

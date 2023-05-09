@@ -148,8 +148,21 @@ public class Game extends Thread{
     }
 
     private String getInput(Player player){
-        //map # my sx # my sy # my ops # your sx # your sy # your ops
-        
+        //map # my sx # my sy # (my ops) # your sx # your sy # (your ops)
+        Player me, you;
+        if(playerA.getId().equals(player.getId())){
+            me = playerA;
+            you = playerB;
+        }else{
+            you = playerA;
+            me = playerB;
+        }
+        System.out.println(getMapString());
+        return getMapString() +
+                "#" + me.getSx() + "#" + me.getSy() +
+                "#(" + me.getStepsString() + ")" +
+                "#" + you.getSx() + "#" + you.getSy() +
+                "#(" + you.getStepsString() + ")";
     }
 
     private void sendBotCode(Player player){

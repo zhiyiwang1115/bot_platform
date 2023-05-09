@@ -42,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
                 .authorizeRequests()
                 .antMatchers("/user/account/token/", "/user/account/register/").permitAll()
                 //it let "/user/account/token/" and "/user/account/register/" be exposed to public
-                .antMatchers("/pk/start/game/").hasIpAddress("127.0.0.1")
+                .antMatchers("/pk/start/game/","/pk/receive/move/").hasIpAddress("127.0.0.1")
                 //need to permit access from micro services as well
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest().authenticated();

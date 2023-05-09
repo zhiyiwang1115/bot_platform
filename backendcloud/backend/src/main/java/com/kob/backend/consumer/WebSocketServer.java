@@ -58,7 +58,7 @@ public class WebSocketServer {
     private Session session = null;
     private User user;
 
-    private Game game = null;
+    public Game game = null;
 
     //need to store and maintain all connections using static variable
     //need to be thread safe as many threads would visit it at the same time
