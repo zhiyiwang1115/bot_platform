@@ -2,7 +2,10 @@ package com.kob.backend.consumer.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.kob.backend.consumer.WebSocketServer;
+import com.kob.backend.pojo.Bot;
 import com.kob.backend.pojo.Record;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,13 +39,26 @@ public class Game extends Thread{
     private static int[] dx = {-1,0,1,0};
     private static int[] dy = {0,1,0,-1};
 
-    public Game(Integer rows, Integer cols, Integer inner_walls_cnt, Integer idA, Integer idB){
+    private static String addBotUrl = "http://127.0.0.1:3002/bot/add/";
+
+    public Game(Integer rows, Integer cols, Integer inner_walls_cnt, Integer idA, Bot botA, Integer idB, Bot botB){
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_cnt = inner_walls_cnt;
         this.g = new int[rows][cols];
-        playerA = new Player(idA,rows-2,1,new ArrayList<>());
-        playerB = new Player(idB,1,cols-2,new ArrayList<>());
+        //because if manual play, bot object would be null
+        Integer botIdA = -1, botIdB = -1;
+        String botCodeA = "", botCodeB = "";
+        if(botA!=null){
+            botIdA = botA.getId();
+            botCodeA = botA.getContent();
+        }
+        if(botB!=null){
+            botIdB = botB.getId();
+            botCodeB = botB.getContent();
+        }
+        playerA = new Player(idA,botIdA,botCodeA,rows-2,1,new ArrayList<>());
+        playerB = new Player(idB,botIdB,botCodeB,1,cols-2,new ArrayList<>());
     }
 
     public Player getPlayerA() {
@@ -131,6 +147,21 @@ public class Game extends Thread{
         }
     }
 
+    private String getInput(Player player){
+        //map # my sx # my sy # my ops # your sx # your sy # your ops
+        
+    }
+
+    private void sendBotCode(Player player){
+        if(player.getBotId().equals(-1)) return;
+        MultiValueMap<String,String> res = new LinkedMultiValueMap<>();
+        res.add("user_id",player.getId().toString());
+        res.add("bot_code",player.getBotCode());
+        res.add("input",getInput(player));
+        //only need one rest template at websocket server
+        WebSocketServer.restTemplate.postForObject(addBotUrl,res,String.class);
+    }
+
     private boolean nextStep(){ //wait next steps of two players
         try {
             //the reason of sleeping here is that the thread will keep getting next step
@@ -140,6 +171,8 @@ public class Game extends Thread{
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        sendBotCode(playerA);
+        sendBotCode(playerB);
         try{
             for(int i = 0;i<50;i++){
                 Thread.sleep(100);

@@ -15,6 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Player {
     private Integer id;
+    private Integer botId; //-1
+    private String botCode;
     //start point
     private Integer sx;
     private Integer sy;

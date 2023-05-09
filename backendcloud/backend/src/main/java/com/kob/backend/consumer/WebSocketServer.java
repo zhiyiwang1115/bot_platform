@@ -50,7 +50,7 @@ public class WebSocketServer {
         WebSocketServer.recordMapper = recordMapper;
     }
 
-    private static RestTemplate restTemplate;
+    public static RestTemplate restTemplate;
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {WebSocketServer.restTemplate = restTemplate;}
 
@@ -106,7 +106,14 @@ public class WebSocketServer {
 
         //create map after successful match
         //would need to store game between socket a and socket b in the future
-        Game game = new Game(13,14,20,a.getId(),b.getId());
+        Game game = new Game(
+                13,
+                14,
+                20,
+                a.getId(),
+                botA,
+                b.getId(),
+                botB);
         game.createMap();
         //it will do run() in game as the second thread
         game.start();
@@ -167,9 +174,12 @@ public class WebSocketServer {
 
     private void move(int direction){
         if(user.getId().equals(game.getPlayerA().getId())){
-            game.setNextStepA(direction);
+            //if player is using bot, then ignore operations by player
+            if(game.getPlayerA().getBotId().equals(-1))
+                game.setNextStepA(direction);
         }else if (user.getId().equals(game.getPlayerB().getId())){
-            game.setNextStepB(direction);
+            if(game.getPlayerB().getBotId().equals(-1))
+                game.setNextStepB(direction);
         }
     }
 
