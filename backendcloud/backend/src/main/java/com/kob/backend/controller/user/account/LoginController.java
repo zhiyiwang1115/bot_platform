@@ -14,7 +14,7 @@ public class LoginController {
     LoginService loginService;
 
     //RequestParam is used to extract parameters from post
-    @PostMapping("/user/account/token/")
+    @PostMapping("/api/user/account/token/")
     public Map<String,String> login(@RequestParam Map<String,String> map){
         String username = map.get("username");
         String password = map.get("password");

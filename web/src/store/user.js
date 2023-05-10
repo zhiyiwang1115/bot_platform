@@ -45,7 +45,7 @@ export default{
         login(context, data){
             $.ajax({
                 //must including http, also cannot be https because of no certificaiton!!!
-                url: "http://127.0.0.1:3000/user/account/token/",
+                url: "http://127.0.0.1:3000/api/user/account/token/",
                 type: "post",
                 data: {
                   username: data.username,
@@ -69,7 +69,7 @@ export default{
         getinfo(context,data){
             $.ajax({
                 //must including http, also cannot be https!!!
-                url: "http://127.0.0.1:3000/user/account/info/",
+                url: "http://127.0.0.1:3000/api/user/account/info/",
                 type: "get",
                 headers: {
                     //use context to extract data in state

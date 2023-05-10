@@ -3,6 +3,8 @@
     <PlayGround v-if="$store.state.pk.status==='playing'"></PlayGround>
     <MatchGround v-if="$store.state.pk.status==='matching'"></MatchGround>
     <ResultBoard v-if="$store.state.pk.loser!==''"/>
+    <div class="user-color" v-if="$store.state.pk.status==='playing' && $store.state.user.id==$store.state.pk.a_id">Leftdown</div>
+    <div class="user-color" v-if="$store.state.pk.status==='playing' && $store.state.user.id==$store.state.pk.b_id">Rightup</div>
   </div>
 </template>
 
@@ -99,5 +101,10 @@ export default{
 
 <!-- "scoped" keyword makes the css only apply to current component -->
 <style scoped>
-
+div.user-color{
+  text-align: center;
+  color: black;
+  font-size: 30px;
+  font-weight: 600;
+}
 </style>

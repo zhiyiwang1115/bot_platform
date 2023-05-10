@@ -13,7 +13,7 @@ public class UpdateController {
     @Autowired
     UpdateService updateService;
 
-    @PostMapping("/user/bot/update/")
+    @PostMapping("/api/user/bot/update/")
     Map<String,String> update(@RequestParam Map<String,String> map){
         return updateService.update(map);
     }

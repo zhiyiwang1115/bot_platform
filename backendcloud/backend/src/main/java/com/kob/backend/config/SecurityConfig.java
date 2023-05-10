@@ -40,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/user/account/token/", "/user/account/register/").permitAll()
+                .antMatchers("/api/user/account/token/", "/api/user/account/register/").permitAll()
                 //it let "/user/account/token/" and "/user/account/register/" be exposed to public
                 .antMatchers("/pk/start/game/","/pk/receive/move/").hasIpAddress("127.0.0.1")
                 //need to permit access from micro services as well
