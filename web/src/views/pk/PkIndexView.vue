@@ -25,6 +25,7 @@ export default{
 
       //otherwise there would be a win/lose/draw box
       store.commit("updateLoser","");
+      store.commit("updateIsRecord",false);
       //can use commit here as well
       store.commit("updateOpponent",{
         username: "Your Opponent",

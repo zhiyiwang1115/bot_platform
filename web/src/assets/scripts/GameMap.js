@@ -86,6 +86,30 @@ export class GameMap extends GameObject {
     }
 
     add_listening_events(){
+        //if it is record, then not get any input from key board
+        if(this.store.state.record.is_record){
+            let k = 0;
+            const a_steps = this.store.state.record.a_steps;
+            const b_steps = this.store.state.record.b_steps;
+            const loser = this.store.state.pk.loser;
+            //every 300 ms change next direction
+            //need to define interval id since we need to clear it afterwards
+            const interval_id = setInterval(()=>{
+                const [snake0, snake1] = this.snakes;
+                if(k>=a_steps.length-1 || k>=b_steps.length-1){
+                    //don't need to draw the last step
+                    if(loser==="A" || loser==="all")snake0.status="die";
+                    if(loser==="B" || loser==="all")snake1.status="die";
+                    //clear the time interval
+                    clearInterval(interval_id);
+                }else{
+                    snake0.set_direction(parseInt(a_steps[k]));
+                    snake1.set_direction(parseInt(b_steps[k]));
+                }
+                k += 1;
+            },300);
+            return;
+        }
         //focus canvas so that it can get user input
         this.ctx.canvas.focus();
         // const [snake0, snake1] = this.snakes;

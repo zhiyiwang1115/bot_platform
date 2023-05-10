@@ -41,12 +41,16 @@ public class GetRecordServiceImpl implements GetRecordService {
             item.put("a_photo",userA.getPhoto());
             item.put("b_username", userB.getUsername());
             item.put("b_photo",userB.getPhoto());
+            String res = "Draw";
+            if(record.getLoser().equals("A"))res = "B wins";
+            else if(record.getLoser().equals("B")) res = "A wins";
+            item.put("result",res);
             item.put("record", record);
             items.add(item);
         }
         resp.put("records",items);
         //pass how many records in total for frontend
-        resp.put("records_count",records.size());
+        resp.put("records_cnt",recordMapper.selectCount(new QueryWrapper<>()));
         return resp;
     }
 }
